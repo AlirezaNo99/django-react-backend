@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+
+# Ignore environment variables and sensitive info
+.env
+.env.*
+
+# Ignore database file if using SQLite
+db.sqlite3
+
+# Media files
+/media/
+
+# Django cache
+*.mo
+*.swp
+
+# Static and compiled files
+/staticfiles/
+node_modules/
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+.DS_Store
+
+# Ignore package and build files
+*.egg-info/
+.eggs/
+*.bak
+build/
+dist/
+
+# Ignore migrations (optional, if regenerating them frequently)
+**/migrations/**
+
+# Compiled and cached files from pip and pipenv
+pip-log.txt
+pip-delete-this-directory.txt
+Pipfile.lock
+__pycache__/
+
+# Virtual environment
+venv/
+dar/
