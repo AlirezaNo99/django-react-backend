@@ -25,18 +25,26 @@ from dPCategories import urls as dpCategories_urls
 from businessInfo import urls as businessInfo_urls
 from cart import urls as cart_urls
 from core import urls as core_urls
-
+from newsletter import urls as newsletter_urls
 from digitalProducts import urls as digitalProducts_urls
+from orders import urls as orders_urls
+
 from users import urls as users_urls
 from django.conf import settings
 from django.conf.urls.static import static
+from core.sitemaps import PostSitemap,ProductSitemap,StaticViewSitemap
+from django.contrib.sitemaps.views import sitemap
 #from django.views.generic import TemplateView
 
 ##from templates.views import ReactAppView 
 router = routers.DefaultRouter()
 
 
-
+sitemaps = {
+    'static': StaticViewSitemap,
+    'products': ProductSitemap,
+    'posts': PostSitemap,
+}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -47,8 +55,11 @@ urlpatterns = [
     path('api/', include('users.urls')),
     path('api/', include('businessInfo.urls')),
     path('api/', include('cart.urls')),
-    path('api/', include('core.urls')),  # Add this line for core app URLs
+    path('api/', include('core.urls')), 
+    path('api/', include('orders.urls')), 
+    path('api/', include('newsletter.urls')), 
 
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
 
 if settings.DEBUG:

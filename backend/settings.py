@@ -1,6 +1,3 @@
-
-
-
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -20,12 +17,35 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'api.busiknow.com',
+    'www.api.busiknow.com',
     'busiknow.com',   # Add your actual domain here
     'www.busiknow.com',  # Add your DirectAdmin server address
     'localhost',
-    
+    'https://busiknow.com',
+    'http://localhost:5000',
+    "http://localhost:3000",
+    "https://panel.busiknow.com"
 ]
-
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5000',
+    'http://localhost:3000',  # Add your frontend URL here
+    'https://busiknow.com',
+    "https://panel.busiknow.com"   # Add your production frontend URL if applicable
+]
+CSRF_COOKIE_SECURE = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5000',  # Development frontend
+    'http://localhost:3000',  # Development frontend
+    'https://busiknow.com',
+    "https://panel.busiknow.com"   # Production frontend
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = "*"
+CORS_ORIGIN_WHITELIST = [
+    'https://busiknow.com',
+     'http://localhost:5000',
+    "https://panel.busiknow.com"
+     ]
 # Media files (images, uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
@@ -53,6 +73,8 @@ INSTALLED_APPS = [
     "businessInfo",
     'cart',
     'core',
+    'orders',
+    'newsletter',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'django.contrib.sites',  # Required by allauth
@@ -62,24 +84,26 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'django_filters',
+    'django.contrib.sitemaps'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
-# FRONTEND_URL = 'https://busiknow.com'  # Replace with actual URL
-FRONTEND_URL = 'http://localhost:5000'  # Replace with actual URL
+FRONTEND_URL = 'https://busiknow.com'  # Replace with actual URL
+# FRONTEND_URL = 'http://localhost:5000'  # Replace with actual URL
 
 
 REST_FRAMEWORK = {
@@ -93,8 +117,9 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 
@@ -128,13 +153,13 @@ ACCOUNT_USERNAME_REQUIRED = False  # Don't require username
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Require email verification
 ACCOUNT_UNIQUE_EMAIL = True  # Enforce unique email addresses
 # Email backend for development (prints emails to the console)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'path.to.your.CustomRegisterSerializer',  # Optional if custom serializer
 }
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mail.busiknow.com'  # cPanel SMTP server
 EMAIL_PORT = 465  # or 587 if using TLS
 EMAIL_USE_SSL = True  # For SSL, use True. For TLS, set EMAIL_USE_TLS = True
@@ -202,11 +227,12 @@ CORS_ALLOW_METHODS = [
     'GET',
     'POST',
     'PUT',
+    'PATCH',
     'DELETE',
     'OPTIONS',
 ]
-CORS_ALLOW_ALL_ORIGINS = True  # Temporary for testing
-
+# CORS_ALLOW_ALL_ORIGINS = True  # Temporary for testing
+CSRF_COOKIE_SAMESITE = 'Lax'  # Or 'None' if using cross-site cookies
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -231,3 +257,4 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+AUTH_USER_MODEL = 'users.CustomUser'

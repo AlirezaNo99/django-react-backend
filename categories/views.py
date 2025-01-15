@@ -23,7 +23,14 @@ class CategoryDetail(APIView):
             return Response(serializer.data)
 
     def post(self, request):
-        serializer = CategorySerializer(data=request.data)
+        # Copy the request data to modify it safely
+        data = request.data.copy()
+    
+        # Handle null or empty parent field
+        if 'parent' not in data or data['parent'] in [None, '', 'null']:
+            data['parent'] = None
+
+        serializer = CategorySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -31,7 +38,13 @@ class CategoryDetail(APIView):
 
     def put(self, request, pk):
         category = self.get_object(pk)
-        serializer = CategorySerializer(category, data=request.data)
+        data = request.data.copy()
+    
+        # Handle null or empty parent field
+        if 'parent' not in data or data['parent'] in [None, '', 'null']:
+            data['parent'] = None
+
+        serializer = CategorySerializer(category, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

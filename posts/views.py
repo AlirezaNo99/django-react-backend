@@ -6,6 +6,8 @@ from rest_framework import status
 from .models import Post
 from .serializers import PostSerializer, PostListSerializer
 from django.http import Http404
+from rest_framework import generics
+from categories.models import Category 
 
 
 class PostDetail(APIView):
@@ -82,5 +84,49 @@ class PostDetail(APIView):
 
 class PostCount(APIView):
     def get(self, request):
-        total_posts = Post.objects.count()
+        total_posts = Post.objects.filter(releaseType=1).count()
         return Response({"total_posts": total_posts})
+
+class CustomPagination(PageNumberPagination):
+    page_size = 10  # default page size
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class PostListByCategory(generics.ListAPIView):
+    serializer_class = PostListSerializer
+    pagination_class = CustomPagination
+    def get_descendant_category_ids(self, category_id):  # Add 'self'
+        # Fetch the category and all its descendants
+        descendants = []
+        stack = [category_id]
+
+        while stack:
+            current = stack.pop()
+            descendants.append(current)
+            # Add children of the current category to the stack
+            children = Category.objects.filter(parent_id=current).values_list('id', flat=True)
+            stack.extend(children)
+
+        return descendants
+
+    def get_queryset(self):
+        queryset = Post.objects.filter(releaseType=1)
+
+        # Filter by multiple category IDs
+        category_ids = self.request.query_params.get('category_ids')
+        if category_ids:
+            category_id_list = category_ids.split(',')
+            all_category_ids = []
+            for category_id in category_id_list:
+                all_category_ids.extend(self.get_descendant_category_ids(int(category_id)))
+            queryset = queryset.filter(category__in=all_category_ids)
+
+        # Sorting
+        sort_by = self.request.query_params.get('sort_by')
+        if sort_by:
+            sort_fields = sort_by.split(',')
+            valid_sort_fields = [field for field in sort_fields if field in [ 'updated_at', '-updated_at']]
+            if valid_sort_fields:
+                queryset = queryset.order_by(*valid_sort_fields)
+
+        return queryset

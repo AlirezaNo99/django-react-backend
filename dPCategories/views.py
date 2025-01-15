@@ -4,6 +4,7 @@ from rest_framework import status
 from django.http import Http404
 from .models import DPCategory
 from .serializers import DPCategorySerializer
+import logging
 
 class DPCategoryDetail(APIView):
     def get_object(self, pk):
@@ -21,17 +22,34 @@ class DPCategoryDetail(APIView):
             categories = DPCategory.objects.all()
             serializer = DPCategorySerializer(categories, many=True)
             return Response(serializer.data)
-
+            
     def post(self, request):
-        serializer = DPCategorySerializer(data=request.data)
+        # Log request data for debugging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Received data: {request.data}")
+        
+        data = request.data.copy()
+
+        # Handle 'null' string case explicitly
+        if data.get('parent') in [None, 'null', '']:
+            data['parent'] = None
+
+        serializer = DPCategorySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
     def put(self, request, pk):
         category = self.get_object(pk)
-        serializer = DPCategorySerializer(category, data=request.data)
+        data = request.data.copy()
+
+        # Handle null or empty parent field
+        if 'parent' not in data or data['parent'] in [None, '', 'null']:
+            data['parent'] = None
+
+        serializer = DPCategorySerializer(category, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

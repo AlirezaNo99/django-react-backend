@@ -1,17 +1,21 @@
-from rest_framework_simplejwt.views import  TokenRefreshView,TokenVerifyView
-from .views import RegisterView, UserView, CustomTokenObtainPairView, UserCount,VerifyEmailView, CustomConfirmEmailView
-
-from django.urls import path,include
-
+# users/urls.py
+from django.urls import path
+from . import views
+from .views import RegisterView, ActivateAccount,LoginView,StaffLoginView,RetrieveUserInfoAPIView,DeleteUserAccountView,EditUserAccountView,ValidateUserToken,VerifyStaffTokenView,ActiveNonStaffUserCountView, ActiveNonStaffUserListView, CustomPasswordResetView, CustomPasswordResetConfirmView
 urlpatterns = [
-path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'), 
-path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-path('users/count/', UserCount.as_view(), name='user-count'),  
-path('users/activate/<str:token>/', VerifyEmailView.as_view(), name='email-verify'),
-path('auth/registration/account-confirm-email/<str:key>/', CustomConfirmEmailView.as_view(), name='account_confirm_email'),
-
-path('auth/', include('dj_rest_auth.urls')),  # For login, logout, and password reset
-path('auth/registration/', include('dj_rest_auth.registration.urls')),  # For registration and email verification
-
+    path('auth/register/', RegisterView.as_view(), name='register'),
+    path('auth/activate/', ActivateAccount.as_view(), name='activate-account'),
+    path('auth/login/', LoginView.as_view(), name='login'),
+    path('auth/staff/login/', StaffLoginView.as_view(), name='staff-login'),  
+    path('auth/user-info/', RetrieveUserInfoAPIView.as_view(), name='user_info'),
+    path('auth/user/edit/', EditUserAccountView.as_view(), name='edit_user_account'),
+    path('auth/user/delete/', DeleteUserAccountView.as_view(), name='delete_user_account'),
+    path('auth/user/validate-token/', ValidateUserToken.as_view(), name='validate-token'),
+    path('auth/staff/verify-token/', VerifyStaffTokenView.as_view(), name='validate-staff-token'),
+    path('auth/users/active-non-staff/count/', ActiveNonStaffUserCountView.as_view(), name='active_non_staff_user_count'),
+    path('auth/users/active-non-staff/', ActiveNonStaffUserListView.as_view(), name='active_non_staff_user_list'),
+    path('auth/users/password-reset/', CustomPasswordResetView.as_view(), name='password_reset'),
+    path('auth/users/password-reset-confirm/<uidb64>/<token>/',CustomPasswordResetConfirmView.as_view(),name='password_reset_confirm'
+    ),
+    path('csrf-token/', views.csrf_token_view, name='csrf_token'),
 ]

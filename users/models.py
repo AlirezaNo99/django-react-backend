@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,AbstractUser , Group, Permission
 from django.db import models
 
 class CustomUserManager(BaseUserManager):
@@ -8,6 +8,7 @@ class CustomUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+        user.is_active = False  # User is inactive until verified
         user.save(using=self._db)
         return user
 
@@ -16,41 +17,23 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    username = models.CharField(max_length=30, unique=True)
-    mobile = models.CharField(max_length=15, unique=True)
-    city = models.CharField(max_length=50)
-    province = models.CharField(max_length=50)
-    address = models.TextField()
-    gender = models.BooleanField()
-    is_premium = models.BooleanField(default=False)
-    age = models.PositiveIntegerField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    
-    # Adding unique related names to avoid conflicts
+
+class CustomUser(AbstractUser):
+    # Adding unique related_name attributes
+    mobile = models.CharField(max_length=15, blank=True, null=True)
     groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='customuser_set',
+        Group,
+        related_name="custom_user_set",
         blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        related_query_name='customuser'
+        help_text="The groups this user belongs to.",
+        verbose_name="groups",
     )
     user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='customuser_set',
+        Permission,
+        related_name="custom_user_permissions_set",
         blank=True,
-        help_text='Specific permissions for this user.',
-        related_query_name='customuser'
+        help_text="Specific permissions for this user.",
+        verbose_name="user permissions",
     )
-
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'mobile']
-
-    def __str__(self):
-        return self.email
+    class Meta:
+        db_table = 'customuser'

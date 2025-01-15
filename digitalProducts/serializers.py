@@ -7,7 +7,7 @@ class DigitalProductSerializer(serializers.ModelSerializer):
         fields = (
             "id", "title", "category", "status", "keyWords", "summary", 
             "productLink", "mainPicAlt", "mainPic", "body_html", 
-            "releaseType", "author_userName", "created_at", "updated_at"
+            "releaseType", "author_userName", "created_at", "updated_at","price"
         )
 
 class DigitalProductListSerializer(serializers.ModelSerializer):
@@ -15,5 +15,5 @@ class DigitalProductListSerializer(serializers.ModelSerializer):
         model = DigitalProduct
         fields = (
             "id", "title", "category", "status", "keyWords", "summary", 
-            "mainPic", "releaseType", "author_userName", "created_at", "updated_at"
+            "releaseType", "author_userName", "created_at", "updated_at","price","thumbnail"
         )

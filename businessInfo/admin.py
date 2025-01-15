@@ -13,6 +13,7 @@ class BusinessInfoAdmin(admin.ModelAdmin):
         "aboutUsImage",
         "email",
         "tel",
+        "tel2",
         "postalCode",
         "address",
         "contactUsImage",
@@ -38,6 +39,10 @@ class BusinessInfoAdmin(admin.ModelAdmin):
         "Banner5",
         "Banner5Text",
         "Banner5Link",
+        "Telegram",
+        "Linkedin",
+        "Instagram",
+        "address2",
     )
 
 

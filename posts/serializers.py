@@ -22,6 +22,7 @@ class PostSerializer(serializers.ModelSerializer):
             "mainPicAlt",
             "created_at",  # Include the new fields
             "updated_at",
+         
         )
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -37,12 +38,13 @@ class PostListSerializer(serializers.ModelSerializer):
             "status",
             "keyWords",
             "summary",
-            "mainPic",
+            "thumbnail",
             "releaseType",
             "author_userName",
             "mainPicAlt",
             "created_at",  # Include the new fields
             "updated_at",
+            "thumbnail"
         )
 
     def create(self, validated_data):

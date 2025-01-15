@@ -7,7 +7,7 @@ from .serializers import (
     HeaderInfoSerializer,
     AboutUsInfoSerializer,
     ContactUsInfoSerializer,
-    PoliciesInfoSerializer,HomeBannersSerializer,MainBannerSerializer
+    PoliciesInfoSerializer,HomeBannersSerializer,MainBannerSerializer,AllBusinessInfoSerializer,BusinessInfoUpdateSerializer
 )
 from django.http import Http404
 
@@ -60,9 +60,33 @@ class MainBannerInfoView(BusinessInfoBaseView):
         serializer = MainBannerSerializer(business_info)
         return Response(serializer.data)
 
+# AllBusiness Info View
+class AllBusinessInfoView(BusinessInfoBaseView):
+    def get(self, request):
+        business_info = self.get_object()
+        serializer = AllBusinessInfoSerializer(business_info)
+        return Response(serializer.data)
+
 # HomeBanners Info View
 class HomeBannersInfoView(BusinessInfoBaseView):
     def get(self, request):
         business_info = self.get_object()
         serializer = HomeBannersSerializer(business_info)
         return Response(serializer.data)
+
+class BusinessInfoUpdateView(BusinessInfoBaseView):
+    def patch(self, request):
+        business_info = self.get_object()
+        serializer = BusinessInfoUpdateSerializer(business_info, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        business_info = self.get_object()
+        serializer = BusinessInfoUpdateSerializer(business_info, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

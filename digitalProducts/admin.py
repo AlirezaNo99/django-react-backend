@@ -6,13 +6,13 @@ class digitalProductAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "category",
-        "status",
         "keyWords",
         "summary",
         "mainPic",
         "body_html",
         "releaseType",
         "author_userName",
+        "price"
     )
 
 

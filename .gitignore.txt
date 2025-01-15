@@ -18,7 +18,7 @@ __pycache__/
 db.sqlite3
 
 # Media files
-/media/
+media/
 
 # Django cache
 *.mo
