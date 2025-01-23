@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
+from django.utils.encoding import force_bytes,smart_bytes
 from django.contrib.auth import get_user_model, authenticate  
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,7 +20,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser 
-from .serializers import ActiveUserListSerializer
+from .serializers import ActiveUserListSerializer,PasswordResetSerializer,PasswordResetConfirmSerializer
 from rest_framework.pagination import PageNumberPagination
 from .forms import CustomPasswordResetForm
 from django.contrib.auth.views import PasswordResetView,PasswordResetConfirmView
@@ -29,7 +29,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
-
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.template.loader import render_to_string
 User = get_user_model()
 
 def generate_jwt_token(user):
@@ -94,6 +95,7 @@ class LoginView(APIView):
         return Response({"token": token}, status=status.HTTP_200_OK)
 
 class StaffLoginView(APIView):
+    print("came in ")
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -262,69 +264,35 @@ class ActiveNonStaffUserListView(generics.ListAPIView):
                 queryset = queryset.order_by(*valid_sort_fields)
 
         return queryset
+class PasswordResetRequestView(APIView):
+    def post(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                user = User.objects.get(email=email)
+                uid = urlsafe_base64_encode(smart_bytes(user.pk))
+                token = PasswordResetTokenGenerator().make_token(user)
+                
+                reset_link = f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
+                
+                # Send email with the reset link
+                email_body = render_to_string('emails/password_reset.html', {'reset_link': reset_link})
+                send_mail(
+                    subject="Password Reset Request",
+                    message=email_body,
+                    from_email='no-reply@example.com',
+                    recipient_list=[email]
+                )
+                return Response({"message": "Password reset email sent."}, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return Response({"message": "Email address not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CustomPasswordResetView(PasswordResetView):
-    permission_classes = [AllowAny]
-
-    def dispatch(self, request, *args, **kwargs):
-        print(f"Request method: {request.method}")  # Debug request method
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        try:
-            if request.content_type == 'application/json':
-                data = json.loads(request.body)
-                email = data.get('email')
-            else:
-                email = request.POST.get('email')
-            print(settings.EMAIL_BACKEND)
-
-            print(f"Email received: {email}")  # Debug: print the email
-
-            if not User.objects.filter(email=email).exists():
-                return JsonResponse({"error": "Email not found."}, status=400)
-
-            return super().post(request, *args, **kwargs)
-
-        except Exception as e:
-            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
-
-    def form_valid(self, form):
-        print("entered the form valid")
-        email = form.cleaned_data['email']
-        token = form.reset_token
-        uid = form.uid
-        reset_link = self.request.build_absolute_uri(f"/reset/{uid}/{token}/")
-        print(f"Password reset link for {email}: {reset_link}")  # This should print in the console
-        return super().form_valid(form)
-
-
-class CustomPasswordResetConfirmView(PasswordResetConfirmView):
-    def post(self, request, *args, **kwargs):
-        uidb64 = kwargs.get('uidb64')
-        token = kwargs.get('token')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        
-        # Decode the user ID
-        try:
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return JsonResponse({"error": "Invalid user ID."}, status=400)
-
-        # Check the token validity
-        if not default_token_generator.check_token(user, token):
-            return JsonResponse({"error": "Invalid or expired token."}, status=400)
-        
-        # Validate and set the new password
-        if new_password != confirm_password:
-            return JsonResponse({"error": "Passwords do not match."}, status=400)
-        
-        user.set_password(new_password)
-        user.save()
-        
-        return JsonResponse({"success": "Password has been reset successfully."})
-
-def csrf_token_view(request):
-    return JsonResponse({'csrfToken': get_token(request)})
+class PasswordResetConfirmView(APIView):
+    @csrf_exempt
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Password reset successful.'}, status=status.HTTP_200_OK)

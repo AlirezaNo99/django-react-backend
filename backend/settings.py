@@ -32,20 +32,21 @@ CSRF_TRUSTED_ORIGINS = [
     'https://busiknow.com',
     "https://panel.busiknow.com"   # Add your production frontend URL if applicable
 ]
-CSRF_COOKIE_SECURE = True
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5000',  # Development frontend
-    'http://localhost:3000',  # Development frontend
-    'https://busiknow.com',
-    "https://panel.busiknow.com"   # Production frontend
-]
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = "*"
-CORS_ORIGIN_WHITELIST = [
-    'https://busiknow.com',
-     'http://localhost:5000',
-    "https://panel.busiknow.com"
-     ]
+CSRF_COOKIE_SECURE = False
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:5000',  # Development frontend
+#     'http://localhost:3000',  # Development frontend
+#     'https://busiknow.com',
+#     "https://panel.busiknow.com"   # Production frontend
+# ]
+# CORS_ALLOW_CREDENTIALS = False
+# CORS_ALLOW_HEADERS = "*"
+# CORS_ORIGIN_WHITELIST = [
+#     'https://busiknow.com',
+#     'http://localhost:5000',
+#     'http://localhost:3000',
+#     "https://panel.busiknow.com"
+#      ]
 # Media files (images, uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
@@ -153,13 +154,13 @@ ACCOUNT_USERNAME_REQUIRED = False  # Don't require username
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Require email verification
 ACCOUNT_UNIQUE_EMAIL = True  # Enforce unique email addresses
 # Email backend for development (prints emails to the console)
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'path.to.your.CustomRegisterSerializer',  # Optional if custom serializer
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mail.busiknow.com'  # cPanel SMTP server
 EMAIL_PORT = 465  # or 587 if using TLS
 EMAIL_USE_SSL = True  # For SSL, use True. For TLS, set EMAIL_USE_TLS = True
@@ -231,7 +232,7 @@ CORS_ALLOW_METHODS = [
     'DELETE',
     'OPTIONS',
 ]
-# CORS_ALLOW_ALL_ORIGINS = True  # Temporary for testing
+CORS_ALLOW_ALL_ORIGINS = True  # Temporary for testing
 CSRF_COOKIE_SAMESITE = 'Lax'  # Or 'None' if using cross-site cookies
 LOGGING = {
     'version': 1,
@@ -258,3 +259,4 @@ AUTHENTICATION_BACKENDS = (
 )
 
 AUTH_USER_MODEL = 'users.CustomUser'
+PASSWORD_RESET_TIMEOUT = 86400
