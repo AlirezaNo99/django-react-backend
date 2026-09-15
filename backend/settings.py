@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'core',
     'orders',
     'newsletter',
+    'customOrderForm',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'django.contrib.sites',  # Required by allauth

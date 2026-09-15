@@ -26,6 +26,7 @@ from businessInfo import urls as businessInfo_urls
 from cart import urls as cart_urls
 from core import urls as core_urls
 from newsletter import urls as newsletter_urls
+from customOrderForm import urls as customOrderForm_urls
 from digitalProducts import urls as digitalProducts_urls
 from orders import urls as orders_urls
 
@@ -58,6 +59,8 @@ urlpatterns = [
     path('api/', include('core.urls')), 
     path('api/', include('orders.urls')), 
     path('api/', include('newsletter.urls')), 
+    path('api/', include('customOrderForm.urls')), 
+
 
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
