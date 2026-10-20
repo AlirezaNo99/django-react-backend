@@ -4,40 +4,66 @@ import os
 class BusinessInfo(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=150)
+
     logoDark = models.ImageField(upload_to='business/', null=True, blank=True)
     logoLight = models.ImageField(upload_to='business/', null=True, blank=True)
+
     aboutUs = models.TextField()
     aboutUsSummary = models.CharField(max_length=1000)
     aboutUsImage = models.ImageField(upload_to='business/', null=True, blank=True)
+
     tel = models.IntegerField()
-    tel2 = models.IntegerField( null=True, blank=True)
+    tel2 = models.IntegerField(null=True, blank=True)
     postalCode = models.IntegerField()
     address = models.CharField(max_length=2000, null=True, blank=True)
     address2 = models.CharField(max_length=2000, null=True, blank=True)
     email = models.CharField(max_length=500)
+
     contactUsImage = models.ImageField(upload_to='business/', null=True, blank=True)
+
     policies = models.TextField()
     policiesImage = models.ImageField(upload_to='business/', null=True, blank=True)
+
+    promoTitle = models.CharField(
+        max_length=200,
+        null=False,
+        blank=False,
+        default="چرا بیزینو"
+    )
+    promoDesc = models.TextField(default="")
+    promoImage = models.ImageField(upload_to='business/', null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     mainBanner = models.ImageField(upload_to='business/', null=True, blank=True)
     mainBannerText = models.CharField(max_length=200, null=True, blank=True)
+    mainBannerDesc = models.CharField(max_length=2000, null=True, blank=True)
     mainBannerLink = models.TextField(null=True, blank=True)
+    mainBannerShowCta = models.BooleanField(default=False)
+    mainBannerCtaLink = models.CharField(max_length=200, null=True, blank=True)
+    mainBannerCtaText = models.CharField(max_length=200, null=True, blank=True)
+
     Banner1 = models.ImageField(upload_to='business/', null=True, blank=True)
     Banner1Text = models.CharField(max_length=200, null=True, blank=True)
     Banner1Link = models.TextField(null=True, blank=True)
+
     Banner2 = models.ImageField(upload_to='business/', null=True, blank=True)
     Banner2Text = models.CharField(max_length=200, null=True, blank=True)
     Banner2Link = models.TextField(null=True, blank=True)
+
     Banner3 = models.ImageField(upload_to='business/', null=True, blank=True)
     Banner3Text = models.CharField(max_length=200, null=True, blank=True)
     Banner3Link = models.TextField(null=True, blank=True)
+
     Banner4 = models.ImageField(upload_to='business/', null=True, blank=True)
     Banner4Text = models.CharField(max_length=200, null=True, blank=True)
     Banner4Link = models.TextField(null=True, blank=True)
+
     Banner5 = models.ImageField(upload_to='business/', null=True, blank=True)
     Banner5Text = models.CharField(max_length=200, null=True, blank=True)
     Banner5Link = models.TextField(null=True, blank=True)
+
     Instagram = models.CharField(max_length=300, null=True, blank=True)
     Linkedin = models.CharField(max_length=300, null=True, blank=True)
     Telegram = models.CharField(max_length=300, null=True, blank=True)
@@ -77,3 +103,37 @@ class BusinessInfo(models.Model):
             if field and os.path.isfile(field.path):
                 os.remove(field.path)
         super().delete(*args, **kwargs)
+
+
+class Certificate(models.Model):
+    business = models.ForeignKey(
+        BusinessInfo,
+        on_delete=models.CASCADE,
+        related_name='certificates'
+    )
+
+    name = models.CharField(max_length=200)
+
+    image = models.ImageField(
+        upload_to='business/certificates/',
+        null=True,
+        blank=True
+    )
+
+    thumbnail = models.ImageField(
+        upload_to='business/certificates/thumbnails/',
+        null=True,
+        blank=True
+    )
+
+    link = models.URLField(
+        max_length=1000,
+        null=True,
+        blank=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

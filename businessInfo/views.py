@@ -1,16 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import BusinessInfo
+from .models import BusinessInfo, Certificate
 from .serializers import (
     FooterInfoSerializer,
     HeaderInfoSerializer,
     AboutUsInfoSerializer,
     ContactUsInfoSerializer,
-    PoliciesInfoSerializer,HomeBannersSerializer,MainBannerSerializer,AllBusinessInfoSerializer,BusinessInfoUpdateSerializer
+    PoliciesInfoSerializer,HomeBannersSerializer,MainBannerSerializer,PromoSerializer,AllBusinessInfoSerializer,BusinessInfoUpdateSerializer,CertificateSerializer
 )
 from django.http import Http404
-
+from rest_framework.parsers import MultiPartParser, FormParser
 class BusinessInfoBaseView(APIView):
     def get_object(self):
         try:
@@ -60,6 +60,12 @@ class MainBannerInfoView(BusinessInfoBaseView):
         serializer = MainBannerSerializer(business_info)
         return Response(serializer.data)
 
+class PromoInfoView(BusinessInfoBaseView):
+    def get(self, request):
+        business_info = self.get_object()
+        serializer = PromoSerializer(business_info)
+        return Response(serializer.data)
+
 # AllBusiness Info View
 class AllBusinessInfoView(BusinessInfoBaseView):
     def get(self, request):
@@ -90,3 +96,88 @@ class BusinessInfoUpdateView(BusinessInfoBaseView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class CertificateListCreateView(APIView):
+
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get(self, request):
+
+        business_info = BusinessInfo.objects.first()
+
+        if not business_info:
+            return Response(
+                {"detail": "Business information not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        certificates = Certificate.objects.filter(
+            business=business_info
+        )
+
+        serializer = CertificateSerializer(
+            certificates,
+            many=True,
+            context={"request": request}
+        )
+
+        return Response(serializer.data)
+
+
+    def post(self, request):
+
+        business_info = BusinessInfo.objects.first()
+
+        if not business_info:
+            return Response(
+                {"detail": "Business information not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = CertificateSerializer(
+            data=request.data,
+            context={"request": request}
+        )
+
+        if serializer.is_valid():
+
+            certificate = serializer.save(
+                business=business_info
+            )
+
+            return Response(
+                CertificateSerializer(
+                    certificate,
+                    context={"request": request}
+                ).data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class CertificateDetailView(APIView):
+
+    parser_classes = (MultiPartParser, FormParser)
+
+    def delete(self, request, pk):
+
+        try:
+            certificate = Certificate.objects.get(
+                pk=pk
+            )
+
+        except Certificate.DoesNotExist:
+
+            return Response(
+                {"detail": "Certificate not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        certificate.delete()
+
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )

@@ -1,8 +1,23 @@
 from rest_framework import serializers
-from .models import BusinessInfo 
+from .models import BusinessInfo , Certificate
 
+class CertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Certificate
+        fields = (
+            "id",
+            "name",
+            "image",
+            "thumbnail",
+            "link",
+        )
 
 class FooterInfoSerializer(serializers.ModelSerializer):
+
+    certificates = CertificateSerializer(
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = BusinessInfo
@@ -20,7 +35,7 @@ class FooterInfoSerializer(serializers.ModelSerializer):
             "Linkedin",
             "Instagram",
             "address2",
-
+            "certificates",
         )
 
 class HeaderInfoSerializer(serializers.ModelSerializer):
@@ -67,7 +82,22 @@ class MainBannerSerializer(serializers.ModelSerializer):
             "id",
             "mainBanner",
             "mainBannerText",
+            "mainBannerDesc",
             "mainBannerLink",
+            "mainBannerCtaText",
+            "mainBannerShowCta",
+            "mainBannerCtaLink"
+        )
+
+class PromoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = BusinessInfo
+        fields = (
+            "id",
+            "promoTitle",
+            "promoDesc",
+            "promoImage"
         )
 
 class HomeBannersSerializer(serializers.ModelSerializer):

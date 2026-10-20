@@ -1,7 +1,9 @@
 from django.contrib import admin
-from .models import BusinessInfo
+from .models import BusinessInfo,Certificate
 
-
+class CertificateInline(admin.TabularInline):
+    model = Certificate
+    extra = 1
 class BusinessInfoAdmin(admin.ModelAdmin):
     list_display = (
         "id",
@@ -24,6 +26,9 @@ class BusinessInfoAdmin(admin.ModelAdmin):
         "mainBanner",
         "mainBannerText",
         "mainBannerLink",
+        "promoTitle",
+        "promoDesc",
+        "promoImage",
         "Banner1",
         "Banner1Text",
         "Banner1Link",
@@ -44,6 +49,9 @@ class BusinessInfoAdmin(admin.ModelAdmin):
         "Instagram",
         "address2",
     )
+    inlines = [
+        CertificateInline,
+    ]
 
 
 admin.site.register(BusinessInfo, BusinessInfoAdmin)
